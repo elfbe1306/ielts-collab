@@ -14,6 +14,11 @@ function parseDocumentName(documentName) {
     return match ? { assignmentId: match[1], userId: match[2] } : null;
 }
 
+// "presence:{assignmentId}" — document rỗng, chỉ dùng awareness để biết ai đang online
+function isPresenceDocument(documentName) {
+    return /^presence:[0-9a-f-]{36}$/i.test(documentName);
+}
+
 async function callSpring(path, options = {}) {
     return fetch(`${SPRING_API_URL}/internal/writing-submissions/${path}`, {
         ...options,
@@ -32,6 +37,8 @@ const server = new Server({
     extensions: [
         new Database({
             fetch: async ({ documentName }) => {
+                if (isPresenceDocument(documentName)) return null;
+
                 const ids = parseDocumentName(documentName);
                 if (!ids) throw new Error(`Tên tài liệu không hợp lệ: ${documentName}`);
 
@@ -49,6 +56,8 @@ const server = new Server({
             },
 
             store: async ({ documentName, state }) => {
+                if (isPresenceDocument(documentName)) return;
+
                 const ids = parseDocumentName(documentName);
                 if (!ids) return;
 
