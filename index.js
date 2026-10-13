@@ -32,8 +32,8 @@ async function callSpring(path, options = {}) {
 
 const server = new Server({
     port: 1234,
-    debounce: 5000,
-    maxDebounce: 30000,
+    debounce: 3000,
+    maxDebounce: 15000,
     extensions: [
         new Database({
             fetch: async ({ documentName }) => {
@@ -55,7 +55,7 @@ const server = new Server({
                 return new Uint8Array(Buffer.from(content, "base64"));
             },
 
-            store: async ({ documentName, state }) => {
+            store: async ({ document, documentName, state }) => {
                 if (isPresenceDocument(documentName)) return;
 
                 const ids = parseDocumentName(documentName);
@@ -69,6 +69,8 @@ const server = new Server({
                 if (!response.ok) {
                     throw new Error(`Lưu bài thất bại (${response.status}) cho ${documentName}`);
                 }
+
+                document.broadcastStateless(JSON.stringify({ type: "saved" }));
 
                 console.log(`Đã lưu ${documentName} (${state.length} byte)`);
             },
