@@ -20,7 +20,7 @@ function isPresenceDocument(documentName) {
 }
 
 async function callSpring(path, options = {}) {
-    return fetch(`${SPRING_API_URL}/internal/writing-submissions/${path}`, {
+    return fetch(`${SPRING_API_URL}/internal/writing-drafts/${path}`, {
         ...options,
         headers: {
             "Content-Type": "application/json",
